@@ -1,17 +1,19 @@
 from socket import *
 
-serverName = 'hostname'
+serverName = raw_input('DNS/IP: ')
 
 serverPort = 5010
 
-clientSocket = socket(AF_INET, SOCK_DGRAM)
+clientSocket = socket(AF_INET, SOCK_STREAM)
 
-message = raw_input('Input the DNS name/ip of your HTTP server')
+clientSocket.connect((serverName, serverPort))
 
-clientSocket.sendto(message.encode(), (serverName, serverPort))
+sentence = raw_input('Input lowercase sentence: ')
 
-modifiedMessage, serverAddress = clientSocket.recvfrom(4096)
+clientSocket.send(sentence)
 
-print(modifiedMessage.decode())
+modifiedMessage = clientSocket.recv(4096)
+
+print("From server " + modifiedMessage)
 
 clientSocket.close()
