@@ -25,8 +25,9 @@ class Client:
 
             modified_message = self.socket.recv(4096)
 
-            if modified_message == '/n':
+            if modified_message == "NULL":
                 self.socket.close()
+                exit()
             else:
                 print("From server: " + modified_message)
 
