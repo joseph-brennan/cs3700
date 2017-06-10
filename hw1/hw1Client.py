@@ -4,7 +4,7 @@ import time
 
 class Client:
     def __init__(self):
-        self.server_name = '127.0.0.1'  # raw_input(' Input the DNS name/ip of your HTTP server: ')
+        self.server_name = raw_input(' Input the DNS name/ip of your HTTP server: ')
         self.server_port = 5010
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.timer = time
@@ -14,6 +14,7 @@ class Client:
         try:
             self.socket.connect((self.server_name, self.server_port))
             self.four_line()
+
         except socket.error as mes:
 
             print "Connection error: %s" % mes
@@ -22,72 +23,79 @@ class Client:
         header = [raw_input("input the HTTP method type: "), raw_input("name of the htm file requested: "),
                   raw_input("HTTP Version: "), raw_input("User Agent: ")]
 
-        self.timer = time.clock()
         str_header = '\n'.join(header)
+
+        self.timer = time.time()
 
         self.socket.send(str_header)
 
-        with open("whatever 2.txt", 'w+') as f:
-            print "created and open"
+        with open(header[1], 'w') as f:
+            # print "created and open"
 
-            print "getting lines"
+            # print "getting lines"
 
-            time_end = time.time()
+            line = self.socket.recv(1024)
 
-            print time_end - self.timer
+            time_elapsed = time.time()
 
-            while True:
-                line = self.socket.recv(4096)
-                if line == "400 Bad Request":
+            print "the RTT is: %0.3f ms" % ((time_elapsed - self.timer) * 1000.0)
 
-                    print("400 Bad Request. Get is the only supported method")
+            if line == "400 Bad Request":
+
+                print("400 Bad Request. Get is the only supported method")
+
+                f.close()
+
+            elif line == "404 Not Found":
+
+                print("404 File Not Found")
+
+                f.close()
+
+            print "{0}/{1} HTTP/{2}\nHost: {3}\nUser-Agent: {4}".format(header[0], header[1], header[2],
+                                                                        self.server_name, header[3])
+
+            for l in line:
+
+                # print "current line: " + l
+
+                if l.count('\n') == 1:
+
+                    self.counter += 1
+
+                    # print "count: %d" % self.counter
+
+                if self.counter == 4:
+
+                    f.write(line)
 
                     f.close()
 
-                    break
-                elif line == "404 Not Found":
+                    self.socket.close()
 
-                    print("404 Not Found")
-
-                    f.close()
+                    # print "file closed"
 
                     break
+        # self.go_again()
+'''
+    def go_again(self):
+        answer = raw_input("would you like continue? y/N: ")
 
-                print "current line: " + line
+        if answer is "Y" or "y":
+            self.four_line()
 
-                while line is '\n':
+        elif answer is "N" or "n":
+            self.socket.close()
 
-                    f.close()
-                    print "file closed"
-                    break
-                f.write(line)
-        self.socket.close()
+            # self.socket.send("NULL")
 
-        # my_file = self.socket.recv(4096)
+            exit()
 
-        # filling_file = [my_file]
-        #
-        # print("From server: " + my_file)
-        #
-        # if my_file == "/n":
-        #     self.counter += 1
-        #
-        # else:
-        #     self.counter = 0
-        #
-        # if self.counter == 4:
-        #     this_file = open("whatever 2.txt", 'w+')
-        #
-        #     for item in filling_file:
-        #
-        #         this_file.write(item)
-        #
-        #         this_file.close()
-        #
-        #         self.socket.close()
-        #
-        #         break
+        else:
+            "invalid response."
 
+            self.go_again()
+'''
 
 if __name__ == '__main__':
     client1 = Client()

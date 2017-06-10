@@ -26,27 +26,31 @@ class Server:
 
     def loop(self, connection_socket, addresss):
 
-        str_header = connection_socket.recv(4096)
+        str_header = connection_socket.recv(1024)
+
+        if str_header == "NULL":
+            connection_socket.close()
+            exit(0)
 
         header = str_header.split('\n')
         if header[0] == "Get":
-            print header[0]
+            # print header[0]
 
             if os.path.isfile(header[1]):
-                print header[1]
+                # print header[1]
 
                 f = open(header[1], 'rb')
 
-                while True:
-                    line = f.read(1048)
+                line = f.read(1024)
 
-                    while line:
-                        connection_socket.send(line)
-                        print line
+                connection_socket.send(line)
 
-                        if f:
-                            f.close()
-                            self.socket.close()
+                # print line
+
+                if not line:
+                    f.close()
+
+                    self.socket.close()
 
             else:
                 print("404 Not Found")
