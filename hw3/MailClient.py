@@ -60,12 +60,18 @@ class MailClient:
 
             end_to = time.time()
 
+            client_data = raw_input("Input the data: ")
+
+            self.socket.send(client_data)
+
             start_data = time.time()
+
+            server_data = self.socket.recv(1024)
 
             end_data = time.time()
 
             self.ouput(start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
-                       end_to, start_data, end_data)
+                       end_to, start_data, server_data, end_data)
 
             running = raw_input("would you like to continue? Y/n: ").strip().lower()
 
@@ -73,12 +79,16 @@ class MailClient:
                 continue
 
             if running == 'n':
-                self.socket.send("NULL")
-                self.socket.close()
-                exit(0)
+                break
+
+        self.socket.send("NULL")
+
+        self.socket.close()
+
+        exit(0)
 
     def ouput(self, start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
-              end_to, start_data, end_data):
+              end_to, start_data, server_data, end_data):
 
         print server_hello
 
@@ -91,6 +101,8 @@ class MailClient:
         print server_to
 
         print "the RTT for receiver is: %0.3f ms" % ((start_to - end_to) * 1000.0)
+
+        print server_data
 
         print "the RTT for email is: %0.3f ms" % ((start_data - end_data) * 1000.0)
 

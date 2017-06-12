@@ -30,8 +30,10 @@ class MailServer:
     def email_server(self, connection_socket, address):
         while True:
             client_hello = connection_socket.recv(1024)
+            print client_hello
 
             if client_hello == "Helo":
+                print "if"
                 server_hello = client_hello + " " + address[0]
 
                 connection_socket.send(server_hello)
@@ -39,14 +41,16 @@ class MailServer:
                 self.email_call(connection_socket, address)
 
             elif client_hello == "NULL":
+                print "kill"
 
-                connection_socket.close()
+                break
 
             else:
+                print "mistake"
 
                 connection_socket.send("503 5.5.2 Send hello first")
 
-
+        connection_socket.close()
 
     def email_call(self, connection_socket, address):
         client_from = connection_socket.recv(1024)
