@@ -3,7 +3,7 @@ import socket
 from threading import Thread
 
 
-class Server():
+class Server:
     def __init__(self):
         self.serverPort = 5010
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
