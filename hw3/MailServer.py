@@ -1,10 +1,64 @@
+# import smtplib
+import socket
+import threading
+
 
 class MailServer:
     def __init__(self):
-        pass
+        self.serverPort = 5010
+
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     def connection(self):
-        pass
 
-    def email_server(self):
-        pass
+        self.socket.bind(('', self.serverPort))
+
+        self.socket.listen(5)
+
+        print("The server is ready to receive")
+
+        while True:
+            connection_socket, address = self.socket.accept()
+
+            connection_socket.send("220 " + address)
+
+            threading.Thread(self.email_server(connection_socket, address)).start()
+
+    def email_server(self, connection_socket, address):
+        client_hello = connection_socket.recv
+
+        if client_hello == "Helo":
+            server_hello = client_hello
+
+            connection_socket.send(server_hello)
+
+        else:
+
+            connection_socket.send("503 5.5.2 Send hello first")
+
+        client_from = connection_socket.recv
+
+        server_from = client_from
+
+        connection_socket.send(server_from)
+
+        client_to = connection_socket.recv
+
+        server_to = client_to
+
+        connection_socket.send(server_to)
+
+        client_data = connection_socket.recv
+
+        server_data = client_data
+
+        connection_socket.send(server_data)
+
+
+if __name__ == '__main__':
+    server1 = MailServer()
+
+    server1.connection()
+
