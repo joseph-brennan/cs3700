@@ -67,12 +67,13 @@ class MailClient:
             self.ouput(start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
                        end_to, start_data, end_data)
 
-            running = raw_input("would you like to continue? Y/n: ")
+            running = raw_input("would you like to continue? Y/n: ").strip().lower()
 
-            if running == 'Y' or 'y':
+            if running == 'y':
                 continue
 
-            elif running == 'N' or 'n':
+            if running == 'n':
+                self.socket.send("NULL")
                 self.socket.close()
                 exit(0)
 

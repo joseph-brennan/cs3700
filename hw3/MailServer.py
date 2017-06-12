@@ -28,17 +28,27 @@ class MailServer:
             threading.Thread(self.email_server(connection_socket, address)).start()
 
     def email_server(self, connection_socket, address):
-        client_hello = connection_socket.recv(1024)
+        while True:
+            client_hello = connection_socket.recv(1024)
 
-        if client_hello == "Helo":
-            server_hello = client_hello + address[0]
+            if client_hello == "Helo":
+                server_hello = client_hello + " " + address[0]
 
-            connection_socket.send(server_hello)
+                connection_socket.send(server_hello)
 
-        else:
+                self.email_call(connection_socket, address)
 
-            connection_socket.send("503 5.5.2 Send hello first")
+            elif client_hello == "NULL":
 
+                connection_socket.close()
+
+            else:
+
+                connection_socket.send("503 5.5.2 Send hello first")
+
+
+
+    def email_call(self, connection_socket, address):
         client_from = connection_socket.recv(1024)
 
         server_from = client_from
@@ -56,7 +66,6 @@ class MailServer:
         server_data = client_data
 
         connection_socket.send(server_data)
-
 
 if __name__ == '__main__':
     server1 = MailServer()
