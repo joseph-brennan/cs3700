@@ -5,9 +5,9 @@ import time
 
 class MailClient:
     def __init__(self):
-        self.server_name = 5010  # raw_input("Input the DNS name/ip of your HTTP server: ")
+        self.server_name = "127.0.0.1"  # raw_input("Input the DNS name/ip of your HTTP server: ")
 
-        self.server_port = '127.0.0.1'  # raw_input("Input the port number of your connection: ")
+        self.server_port = 5010  # raw_input("Input the port number of your connection: ")
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -25,7 +25,7 @@ class MailClient:
 
     def email_client(self):
         while True:
-            client_hello = input("Input command and domain name: ")
+            client_hello = raw_input("Input command and domain name: ")
 
             self.socket.send(client_hello)
 
@@ -40,7 +40,7 @@ class MailClient:
 
                 continue
 
-            client_from = input("Input the sender's address: ")
+            client_from = raw_input("Input the sender's address: ")
 
             self.socket.send(client_from)
 
@@ -50,7 +50,7 @@ class MailClient:
 
             end_from = time.time()
 
-            client_to = input("Input the receiver's address: ")
+            client_to = raw_input("Input the receiver's address: ")
 
             self.socket.send(client_to)
 
@@ -67,15 +67,14 @@ class MailClient:
             self.ouput(start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
                        end_to, start_data, end_data)
 
-            running = input("would you like to continue? Y/n: ")
+            running = raw_input("would you like to continue? Y/n: ")
 
-            if running == "Y" or "y":
+            if running == 'Y' or 'y':
                 continue
 
-            elif running == "N" or "n":
-                break
-
-        self.socket.close()
+            elif running == 'N' or 'n':
+                self.socket.close()
+                exit(0)
 
     def ouput(self, start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
               end_to, start_data, end_data):

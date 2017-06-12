@@ -1,4 +1,3 @@
-# import smtplib
 import socket
 import threading
 
@@ -22,15 +21,17 @@ class MailServer:
         while True:
             connection_socket, address = self.socket.accept()
 
-            connection_socket.send("220 " + address)
+            sender = "220"
+
+            connection_socket.send(sender)
 
             threading.Thread(self.email_server(connection_socket, address)).start()
 
     def email_server(self, connection_socket, address):
-        client_hello = connection_socket.recv
+        client_hello = connection_socket.recv(1024)
 
         if client_hello == "Helo":
-            server_hello = client_hello
+            server_hello = client_hello + address[0]
 
             connection_socket.send(server_hello)
 
@@ -38,19 +39,19 @@ class MailServer:
 
             connection_socket.send("503 5.5.2 Send hello first")
 
-        client_from = connection_socket.recv
+        client_from = connection_socket.recv(1024)
 
         server_from = client_from
 
         connection_socket.send(server_from)
 
-        client_to = connection_socket.recv
+        client_to = connection_socket.recv(1024)
 
         server_to = client_to
 
         connection_socket.send(server_to)
 
-        client_data = connection_socket.recv
+        client_data = connection_socket.recv(1024)
 
         server_data = client_data
 
