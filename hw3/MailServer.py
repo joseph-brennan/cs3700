@@ -49,27 +49,38 @@ class MailServer:
     def from_call(self, connection_socket, address):
         client_from = connection_socket.recv(1024)
 
-        # server_from = client_from
+        server_from = client_from
         while True:
             if client_from == "MAIL FROM":
                 connection_socket.send(server_from)
+                self.to_call(connection_socket, address)
             else:
                 connection_socket.send("03 5.5.2 Need mail command")
-
-        client_data = connection_socket.recv(1024)
-
-        server_data = client_data
-
-        connection_socket.send(server_data)
 
     def to_call(self, connection_socket, address):
         client_to = connection_socket.recv(1024)
 
         server_to = client_to
 
-        connection_socket.send(server_to)
+        while True:
+            if client_to == "MAIL TO":
+                connection_socket.send(server_to)
+                self.data_call(connection_socket, address)
+
+            else:
+                connection_socket.send("")
 
     def data_call(self, connection_socket, address):
+        client_data = connection_socket.recv(1024)
+
+        server_data = client_data
+
+        while True:
+            if client_data == "":
+                connection_socket.send(server_data)
+                self.email_server(connection_socket, address)
+            else:
+                connection_socket.send("")
 
 
 if __name__ == '__main__':
