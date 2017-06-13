@@ -11,6 +11,10 @@ class MailClient:
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+        self.start_hello, self.end_hello, self.start_from, self.end_from = 0, 0, 0, 0
+
+        self.start_to, self.end_to, self.start_data, self.end_data = 0, 0, 0, 0
+
     def connection(self):
         try:
             self.socket.connect((self.server_name, self.server_port))
@@ -29,18 +33,18 @@ class MailClient:
 
             self.socket.send(client_hello)
 
-            start_hello = time.time()
+            self.start_hello = time.time()
 
             server_hello = self.socket.recv(1024)
 
-            end_hello = time.time()
+            self.end_hello = time.time()
 
             if server_hello == "503 5.5.2 Send hello first":
                 print "503 5.5.2 Send hello first"
 
                 continue
 
-            self.build_mail(start_hello, server_hello, end_hello)
+            self.client_from(server_hello)
 
             running = raw_input("would you like to continue? Y/n: ").strip().lower()
 
@@ -56,59 +60,80 @@ class MailClient:
 
         exit(0)
 
-    def build_mail(self, start_hello, server_hello, end_hello):
+    def client_from(self, server_hello):
+        while True:
+            client_from = raw_input("Input the sender's address: ")
 
-        client_from = raw_input("Input the sender's address: ")
+            self.socket.send(client_from)
 
-        self.socket.send(client_from)
+            self.start_from = time.time()
 
-        start_from = time.time()
+            server_from = self.socket.recv(1024)
 
-        server_from = self.socket.recv(1024)
+            self.end_from = time.time()
 
-        end_from = time.time()
+            if server_from == "03 5.5.2 Need mail command":
+                print "03 5.5.2 Need mail command"
 
-        client_to = raw_input("Input the receiver's address: ")
+                continue
 
-        self.socket.send(client_to)
+            self.client_to(server_hello, server_from)
 
-        start_to = time.time()
+    def client_to(self, server_hello, server_from):
+        while True:
+            client_to = raw_input("Input the receiver's address: ")
 
-        server_to = self.socket.recv(1024)
+            self.socket.send(client_to)
 
-        end_to = time.time()
+            self.start_to = time.time()
 
-        client_data = raw_input("Input the data: ")
+            server_to = self.socket.recv(1024)
 
-        self.socket.send(client_data)
+            self.end_to = time.time()
 
-        start_data = time.time()
+            if server_to == "03 5.5.2 Need rcpt command":
+                print "03 5.5.2 Need rcpt command"
 
-        server_data = self.socket.recv(1024)
+                continue
 
-        end_data = time.time()
+            self.client_data(server_hello, server_from, server_to)
 
-        self.ouput(start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
-                   end_to, start_data, server_data, end_data)
+    def client_data(self, server_hello, server_from, server_to):
+        while True:
+            client_data = raw_input("Input the data code: ")
 
-    def ouput(self, start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
-              end_to, start_data, server_data, end_data):
+            self.socket.send(client_data)
+
+            self.start_data = time.time()
+
+            server_data = self.socket.recv(1024)
+
+            self.end_data = time.time()
+
+            if server_data == "503 5.5.2 Need data command":
+                print "503 5.5.2 Need data command"
+
+                continue
+
+            self.ouput(server_hello, server_from, server_to, server_data)
+
+    def ouput(self, server_hello, server_from, server_to, server_data):
 
         print server_hello
 
-        print "the RTT for Hello is: %0.3f ms" % ((start_hello - end_hello) * 1000.0)
+        print "the RTT for Hello is: %0.3f ms" % ((self.start_hello - self.end_hello) * 1000.0)
 
         print server_from
 
-        print "the RTT for sender is: %0.3f ms" % ((start_from - end_from) * 1000.0)
+        print "the RTT for sender is: %0.3f ms" % ((self.start_from - self.end_from) * 1000.0)
 
         print server_to
 
-        print "the RTT for receiver is: %0.3f ms" % ((start_to - end_to) * 1000.0)
+        print "the RTT for receiver is: %0.3f ms" % ((self.start_to - self.end_to) * 1000.0)
 
         print server_data
 
-        print "the RTT for email is: %0.3f ms" % ((start_data - end_data) * 1000.0)
+        print "the RTT for email is: %0.3f ms" % ((self.start_data - self.end_data) * 1000.0)
 
 
 if __name__ == '__main__':

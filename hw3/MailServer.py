@@ -47,44 +47,47 @@ class MailServer:
         connection_socket.close()
 
     def from_call(self, connection_socket, address):
-        client_from = connection_socket.recv(1024)
-
-        server_from = client_from
         while True:
-            if client_from == "MAIL FROM":
+
+            client_from = connection_socket.recv(1024)
+
+            server_from = client_from
+
+            if client_from.upper() == "MAIL FROM":
                 connection_socket.send(server_from)
+
                 self.to_call(connection_socket, address)
             else:
                 connection_socket.send("03 5.5.2 Need mail command")
 
     def to_call(self, connection_socket, address):
-        client_to = connection_socket.recv(1024)
-
-        server_to = client_to
-
         while True:
-            if client_to == "MAIL TO":
+            client_to = connection_socket.recv(1024)
+
+            server_to = client_to
+
+            if client_to.upper() == "MAIL TO":
                 connection_socket.send(server_to)
+
                 self.data_call(connection_socket, address)
 
             else:
-                connection_socket.send("")
+                connection_socket.send("03 5.5.2 Need rcpt command")
 
     def data_call(self, connection_socket, address):
-        client_data = connection_socket.recv(1024)
-
-        server_data = client_data
-
         while True:
-            if client_data == "":
+            client_data = connection_socket.recv(1024)
+
+            server_data = client_data
+
+            if client_data.upper() == "DATA":
                 connection_socket.send(server_data)
                 self.email_server(connection_socket, address)
             else:
-                connection_socket.send("")
+                connection_socket.send("503 5.5.2 Need data command")
 
 
 if __name__ == '__main__':
     server1 = MailServer()
 
     server1.connection()
-
