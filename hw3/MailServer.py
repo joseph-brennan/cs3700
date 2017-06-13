@@ -30,46 +30,47 @@ class MailServer:
     def email_server(self, connection_socket, address):
         while True:
             client_hello = connection_socket.recv(1024)
-            print client_hello
 
             if client_hello == "Helo":
-                print "if"
                 server_hello = client_hello + " " + address[0]
 
                 connection_socket.send(server_hello)
 
-                self.email_call(connection_socket, address)
+                self.from_call(connection_socket, address)
 
             elif client_hello == "NULL":
-                print "kill"
-
                 break
 
             else:
-                print "mistake"
-
                 connection_socket.send("503 5.5.2 Send hello first")
 
         connection_socket.close()
 
-    def email_call(self, connection_socket, address):
+    def from_call(self, connection_socket, address):
         client_from = connection_socket.recv(1024)
 
-        server_from = client_from
-
-        connection_socket.send(server_from)
-
-        client_to = connection_socket.recv(1024)
-
-        server_to = client_to
-
-        connection_socket.send(server_to)
+        # server_from = client_from
+        while True:
+            if client_from == "MAIL FROM":
+                connection_socket.send(server_from)
+            else:
+                connection_socket.send("03 5.5.2 Need mail command")
 
         client_data = connection_socket.recv(1024)
 
         server_data = client_data
 
         connection_socket.send(server_data)
+
+    def to_call(self, connection_socket, address):
+        client_to = connection_socket.recv(1024)
+
+        server_to = client_to
+
+        connection_socket.send(server_to)
+
+    def data_call(self, connection_socket, address):
+
 
 if __name__ == '__main__':
     server1 = MailServer()

@@ -40,38 +40,7 @@ class MailClient:
 
                 continue
 
-            client_from = raw_input("Input the sender's address: ")
-
-            self.socket.send(client_from)
-
-            start_from = time.time()
-
-            server_from = self.socket.recv(1024)
-
-            end_from = time.time()
-
-            client_to = raw_input("Input the receiver's address: ")
-
-            self.socket.send(client_to)
-
-            start_to = time.time()
-
-            server_to = self.socket.recv(1024)
-
-            end_to = time.time()
-
-            client_data = raw_input("Input the data: ")
-
-            self.socket.send(client_data)
-
-            start_data = time.time()
-
-            server_data = self.socket.recv(1024)
-
-            end_data = time.time()
-
-            self.ouput(start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
-                       end_to, start_data, server_data, end_data)
+            self.build_mail(start_hello, server_hello, end_hello)
 
             running = raw_input("would you like to continue? Y/n: ").strip().lower()
 
@@ -86,6 +55,41 @@ class MailClient:
         self.socket.close()
 
         exit(0)
+
+    def build_mail(self, start_hello, server_hello, end_hello):
+
+        client_from = raw_input("Input the sender's address: ")
+
+        self.socket.send(client_from)
+
+        start_from = time.time()
+
+        server_from = self.socket.recv(1024)
+
+        end_from = time.time()
+
+        client_to = raw_input("Input the receiver's address: ")
+
+        self.socket.send(client_to)
+
+        start_to = time.time()
+
+        server_to = self.socket.recv(1024)
+
+        end_to = time.time()
+
+        client_data = raw_input("Input the data: ")
+
+        self.socket.send(client_data)
+
+        start_data = time.time()
+
+        server_data = self.socket.recv(1024)
+
+        end_data = time.time()
+
+        self.ouput(start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
+                   end_to, start_data, server_data, end_data)
 
     def ouput(self, start_hello, server_hello, end_hello, start_from, server_from, end_from, start_to, server_to,
               end_to, start_data, server_data, end_data):
