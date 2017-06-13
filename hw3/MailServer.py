@@ -30,13 +30,18 @@ class MailServer:
     def email_server(self, connection_socket, address):
         while True:
             client_hello = connection_socket.recv(1024)
+            print "hello: " + client_hello
 
             if client_hello == "Helo":
-                server_hello = client_hello + " " + address[0]
+                server_hello = "Hello " + address[0]
 
                 connection_socket.send(server_hello)
 
                 self.from_call(connection_socket, address)
+
+                self.to_call(connection_socket, address)
+
+                self.data_call(connection_socket, address)
 
             elif client_hello == "NULL":
                 break
@@ -51,12 +56,15 @@ class MailServer:
 
             client_from = connection_socket.recv(1024)
 
+            split = client_from.split()
+
             server_from = client_from
 
-            if client_from.upper() == "MAIL FROM":
+            if split[0].upper() + " " + split[1].upper() == "MAIL FROM":
                 connection_socket.send(server_from)
 
-                self.to_call(connection_socket, address)
+                return
+
             else:
                 connection_socket.send("03 5.5.2 Need mail command")
 
@@ -66,10 +74,12 @@ class MailServer:
 
             server_to = client_to
 
-            if client_to.upper() == "MAIL TO":
+            split = client_to.split()
+
+            if split[0].upper() + " " + split[1].upper() == "RCPT TO":
                 connection_socket.send(server_to)
 
-                self.data_call(connection_socket, address)
+                return
 
             else:
                 connection_socket.send("03 5.5.2 Need rcpt command")
@@ -80,12 +90,15 @@ class MailServer:
 
             server_data = client_data
 
-            if client_data.upper() == "DATA":
+            split = client_data.split()
+
+            if split[0].upper() == "DATA":
                 connection_socket.send(server_data)
-                self.email_server(connection_socket, address)
+
+                return
+
             else:
                 connection_socket.send("503 5.5.2 Need data command")
-
 
 if __name__ == '__main__':
     server1 = MailServer()

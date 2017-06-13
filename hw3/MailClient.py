@@ -29,22 +29,15 @@ class MailClient:
 
     def email_client(self):
         while True:
-            client_hello = raw_input("Input command and domain name: ")
+            server_hello = self.client_hello()
 
-            self.socket.send(client_hello)
+            server_from = self.client_from()
 
-            self.start_hello = time.time()
+            server_to = self.client_to()
 
-            server_hello = self.socket.recv(1024)
+            server_data = self.client_data()
 
-            self.end_hello = time.time()
-
-            if server_hello == "503 5.5.2 Send hello first":
-                print "503 5.5.2 Send hello first"
-
-                continue
-
-            self.client_from(server_hello)
+            self.ouput(server_hello, server_from, server_to, server_data)
 
             running = raw_input("would you like to continue? Y/n: ").strip().lower()
 
@@ -60,7 +53,26 @@ class MailClient:
 
         exit(0)
 
-    def client_from(self, server_hello):
+    def client_hello(self):
+        while True:
+            client_hello = raw_input("Input command and domain name: ")
+
+            self.socket.send(client_hello)
+
+            self.start_hello = time.time()
+
+            server_hello = self.socket.recv(1024)
+
+            self.end_hello = time.time()
+
+            if server_hello == "503 5.5.2 Send hello first":
+                print "503 5.5.2 Send hello first"
+
+                continue
+
+            return server_hello
+
+    def client_from(self):
         while True:
             client_from = raw_input("Input the sender's address: ")
 
@@ -77,9 +89,9 @@ class MailClient:
 
                 continue
 
-            self.client_to(server_hello, server_from)
+            return server_from
 
-    def client_to(self, server_hello, server_from):
+    def client_to(self):
         while True:
             client_to = raw_input("Input the receiver's address: ")
 
@@ -96,9 +108,9 @@ class MailClient:
 
                 continue
 
-            self.client_data(server_hello, server_from, server_to)
+            return server_to
 
-    def client_data(self, server_hello, server_from, server_to):
+    def client_data(self):
         while True:
             client_data = raw_input("Input the data code: ")
 
@@ -115,7 +127,7 @@ class MailClient:
 
                 continue
 
-            self.ouput(server_hello, server_from, server_to, server_data)
+            return server_data
 
     def ouput(self, server_hello, server_from, server_to, server_data):
 
@@ -134,6 +146,8 @@ class MailClient:
         print server_data
 
         print "the RTT for email is: %0.3f ms" % ((self.start_data - self.end_data) * 1000.0)
+
+        return
 
 
 if __name__ == '__main__':
