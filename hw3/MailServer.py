@@ -36,7 +36,9 @@ class MailServer:
             split = client_hello.split()
 
             if split[0] == "Helo":
-                server_hello = "250 %s Hello " % self.hostname + address[0]
+                server_hello = "250 {} Hello {}".format(self.hostname, address[0])
+
+                print client_hello
 
                 connection_socket.send(server_hello)
 
@@ -67,6 +69,12 @@ class MailServer:
             if split[0].upper() + " " + split[1].upper() == "MAIL FROM":
                 connection_socket.send("250 2.1.0 Sender OK")
 
+                message = [split[0].upper(), split[1].upper(), split[2]]
+
+                mes = ' '.join(message)
+
+                print mes
+
                 return
 
             else:
@@ -81,6 +89,12 @@ class MailServer:
             if split[0].upper() + " " + split[1].upper() == "RCPT TO":
                 connection_socket.send("250 2.1.5 Recipient OK")
 
+                message = [split[0].upper(), split[1].upper(), split[2]]
+
+                mes = ' '.join(message)
+
+                print mes
+
                 return
 
             else:
@@ -90,10 +104,10 @@ class MailServer:
         while True:
             client_data = connection_socket.recv(1024)
 
-            split = client_data.split()
-
-            if split[0].upper() == "DATA":
+            if client_data.upper() == "DATA":
                 connection_socket.send("354 Start mail input; end with <CRLF>.<CRLF>")
+
+                print client_data.upper()
 
                 return
 
@@ -110,6 +124,8 @@ class MailServer:
                 connection_socket.send("250 Message received and to be delivered")
 
                 mes = '\n'.join(email)
+
+                print mes
 
                 return
 
