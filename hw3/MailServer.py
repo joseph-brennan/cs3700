@@ -10,6 +10,8 @@ class MailServer:
 
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+        self.hostname = socket.gethostbyname(socket.gethostname())
+
     def connection(self):
 
         self.socket.bind(('', self.serverPort))
@@ -34,7 +36,7 @@ class MailServer:
             split = client_hello.split()
 
             if split[0] == "Helo":
-                server_hello = "Hello " + split[1]
+                server_hello = "250 %s Hello " % self.hostname + address[0]
 
                 connection_socket.send(server_hello)
 
@@ -63,7 +65,7 @@ class MailServer:
             split = client_from.split()
 
             if split[0].upper() + " " + split[1].upper() == "MAIL FROM":
-                connection_socket.send("MAIL FROM: " + split[2])
+                connection_socket.send("250 2.1.0 Sender OK")
 
                 return
 
@@ -77,7 +79,7 @@ class MailServer:
             split = client_to.split()
 
             if split[0].upper() + " " + split[1].upper() == "RCPT TO":
-                connection_socket.send("RCPT TO: " + split[2])
+                connection_socket.send("250 2.1.5 Recipient OK")
 
                 return
 
@@ -106,11 +108,14 @@ class MailServer:
             if client_email == ".":
 
                 connection_socket.send("250 Message received and to be delivered")
-                print '\n'.join(email)
+
+                mes = '\n'.join(email)
+
                 return
 
             else:
                 email.append(client_email)
+
                 connection_socket.send("continue")
 
 if __name__ == '__main__':

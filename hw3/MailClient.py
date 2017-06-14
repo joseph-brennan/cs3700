@@ -27,16 +27,16 @@ class MailClient:
             print "Connection error: %s" % mes
 
     def email_client(self):
+        f = open("testResultsClient.txt", 'w')
+
         while True:
-            server_hello = self.client_hello()
+            self.client_hello(f)
 
-            server_from = self.client_from()
+            self.client_from(f)
 
-            server_to = self.client_to()
+            self.client_to(f)
 
-            server_data = self.client_data()
-
-            self.ouput(server_hello, server_from, server_to, server_data)
+            self.client_data(f)
 
             self.mail_message()
 
@@ -54,11 +54,15 @@ class MailClient:
 
         print mes
 
+        f.write(mes)
+
         self.socket.close()
+
+        f.close()
 
         exit(0)
 
-    def client_hello(self):
+    def client_hello(self, f):
         while True:
             client_hello = raw_input("Input command and domain name: ")
 
@@ -75,9 +79,15 @@ class MailClient:
 
                 continue
 
-            return server_hello
+            print "the RTT for Hello is: %0.3f ms" % ((self.end_hello - self.start_hello) * 1000.0)
 
-    def client_from(self):
+            print server_hello
+
+            f.write(server_hello + '\n')
+
+            return
+
+    def client_from(self, f):
         while True:
             client_from = raw_input("Input the sender's address: ")
 
@@ -94,9 +104,15 @@ class MailClient:
 
                 continue
 
-            return server_from
+            print "the RTT for sender is: %0.3f ms" % ((self.end_from - self.start_from) * 1000.0)
 
-    def client_to(self):
+            print server_from
+
+            f.write(server_from + '\n')
+
+            return
+
+    def client_to(self, f):
         while True:
             client_to = raw_input("Input the receiver's address: ")
 
@@ -113,9 +129,15 @@ class MailClient:
 
                 continue
 
-            return server_to
+            print "the RTT for receiver is: %0.3f ms" % ((self.end_to - self.start_to) * 1000.0)
 
-    def client_data(self):
+            print server_to
+
+            f.write(server_to + '\n')
+
+            return
+
+    def client_data(self, f):
         while True:
             client_data = raw_input("Input the data code: ")
 
@@ -132,27 +154,13 @@ class MailClient:
 
                 continue
 
-            return server_data
+            print "the RTT for data is: %0.3f ms" % ((self.end_data - self.start_data) * 1000.0)
 
-    def ouput(self, server_hello, server_from, server_to, server_data):
+            print server_data
 
-        print server_hello
+            f.write(server_data + '\n')
 
-        print "the RTT for Hello is: %0.3f ms" % ((self.end_hello - self.start_hello) * 1000.0)
-
-        print server_from
-
-        print "the RTT for sender is: %0.3f ms" % ((self.end_from - self.start_from) * 1000.0)
-
-        print server_to
-
-        print "the RTT for receiver is: %0.3f ms" % ((self.end_to - self.start_to) * 1000.0)
-
-        print "the RTT for email is: %0.3f ms" % ((self.end_data - self.start_data) * 1000.0)
-
-        print server_data
-
-        return
+            return
 
     def mail_message(self):
         while True:
@@ -163,7 +171,7 @@ class MailClient:
             check = self.socket.recv(1024)
 
             if check == "250 Message received and to be delivered":
-                print ("250 Message received and to be delivered")
+                print check
 
                 return
 
@@ -192,7 +200,28 @@ class MailClient:
                 print "win win"
 
         print lines
+
+    def ouput(self, server_hello, server_from, server_to, server_data):
+
+        print server_hello
+
+        print "the RTT for Hello is: %0.3f ms" % ((self.end_hello - self.start_hello) * 1000.0)
+
+        print server_from
+
+        print "the RTT for sender is: %0.3f ms" % ((self.end_from - self.start_from) * 1000.0)
+
+        print server_to
+
+        print "the RTT for receiver is: %0.3f ms" % ((self.end_to - self.start_to) * 1000.0)
+
+        print "the RTT for data is: %0.3f ms" % ((self.end_data - self.start_data) * 1000.0)
+
+        print server_data
+
+        return
 '''
+
 
 if __name__ == '__main__':
     client1 = MailClient()
