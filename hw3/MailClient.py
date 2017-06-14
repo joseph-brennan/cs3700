@@ -1,13 +1,12 @@
-# import smtplib
 import socket
 import time
 
 
 class MailClient:
     def __init__(self):
-        self.server_name = "127.0.0.1"  # raw_input("Input the DNS name/ip of your HTTP server: ")
+        self.server_name = raw_input("Input the DNS name/ip of your HTTP server: ")
 
-        self.server_port = 5010  # raw_input("Input the port number of your connection: ")
+        self.server_port = int(raw_input("Input the port number of your connection: "))
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -39,6 +38,8 @@ class MailClient:
 
             self.ouput(server_hello, server_from, server_to, server_data)
 
+            self.mail_message()
+
             running = raw_input("would you like to continue? Y/n: ").strip().lower()
 
             if running == 'y':
@@ -47,7 +48,11 @@ class MailClient:
             if running == 'n':
                 break
 
-        self.socket.send("NULL")
+        self.socket.send("QUIT")
+
+        mes = self.socket.recv(1024)
+
+        print mes
 
         self.socket.close()
 
@@ -133,22 +138,61 @@ class MailClient:
 
         print server_hello
 
-        print "the RTT for Hello is: %0.3f ms" % ((self.start_hello - self.end_hello) * 1000.0)
+        print "the RTT for Hello is: %0.3f ms" % ((self.end_hello - self.start_hello) * 1000.0)
 
         print server_from
 
-        print "the RTT for sender is: %0.3f ms" % ((self.start_from - self.end_from) * 1000.0)
+        print "the RTT for sender is: %0.3f ms" % ((self.end_from - self.start_from) * 1000.0)
 
         print server_to
 
-        print "the RTT for receiver is: %0.3f ms" % ((self.start_to - self.end_to) * 1000.0)
+        print "the RTT for receiver is: %0.3f ms" % ((self.end_to - self.start_to) * 1000.0)
+
+        print "the RTT for email is: %0.3f ms" % ((self.end_data - self.start_data) * 1000.0)
 
         print server_data
 
-        print "the RTT for email is: %0.3f ms" % ((self.start_data - self.end_data) * 1000.0)
-
         return
 
+    def mail_message(self):
+        while True:
+            line = raw_input(">>> ")
+
+            self.socket.send(line)
+
+            check = self.socket.recv(1024)
+
+            if check == "250 Message received and to be delivered":
+                print ("250 Message received and to be delivered")
+
+                return
+
+            elif check == "continue":
+                continue
+'''        
+        lines = []
+
+        while True:
+            line = raw_input(">>> ")
+
+            if line == ".":
+                break
+
+            else:
+                lines.append(line)
+
+        email = '\n'.join(lines)
+
+        print email
+#########################################
+        lines = sys.stdin.readlines()
+
+        for i in range(len(lines)):
+            if lines[i] == ".\n":
+                print "win win"
+
+        print lines
+'''
 
 if __name__ == '__main__':
     client1 = MailClient()

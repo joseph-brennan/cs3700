@@ -30,20 +30,24 @@ class MailServer:
     def email_server(self, connection_socket, address):
         while True:
             client_hello = connection_socket.recv(1024)
-            print "hello: " + client_hello
 
-            if client_hello == "Helo":
-                server_hello = "Hello " + address[0]
+            split = client_hello.split()
+
+            if split[0] == "Helo":
+                server_hello = "Hello " + split[1]
 
                 connection_socket.send(server_hello)
 
-                self.from_call(connection_socket, address)
+                self.from_call(connection_socket)
 
-                self.to_call(connection_socket, address)
+                self.to_call(connection_socket)
 
-                self.data_call(connection_socket, address)
+                self.data_call(connection_socket)
 
-            elif client_hello == "NULL":
+                self.mail_call(connection_socket)
+
+            elif client_hello == "QUIT":
+                connection_socket.send("221 <%s> closing connection" % address[0])
                 break
 
             else:
@@ -51,54 +55,63 @@ class MailServer:
 
         connection_socket.close()
 
-    def from_call(self, connection_socket, address):
+    def from_call(self, connection_socket):
         while True:
 
             client_from = connection_socket.recv(1024)
 
             split = client_from.split()
 
-            server_from = client_from
-
             if split[0].upper() + " " + split[1].upper() == "MAIL FROM":
-                connection_socket.send(server_from)
+                connection_socket.send("MAIL FROM: " + split[2])
 
                 return
 
             else:
                 connection_socket.send("03 5.5.2 Need mail command")
 
-    def to_call(self, connection_socket, address):
+    def to_call(self, connection_socket):
         while True:
             client_to = connection_socket.recv(1024)
-
-            server_to = client_to
 
             split = client_to.split()
 
             if split[0].upper() + " " + split[1].upper() == "RCPT TO":
-                connection_socket.send(server_to)
+                connection_socket.send("RCPT TO: " + split[2])
 
                 return
 
             else:
                 connection_socket.send("03 5.5.2 Need rcpt command")
 
-    def data_call(self, connection_socket, address):
+    def data_call(self, connection_socket):
         while True:
             client_data = connection_socket.recv(1024)
-
-            server_data = client_data
 
             split = client_data.split()
 
             if split[0].upper() == "DATA":
-                connection_socket.send(server_data)
+                connection_socket.send("354 Start mail input; end with <CRLF>.<CRLF>")
 
                 return
 
             else:
                 connection_socket.send("503 5.5.2 Need data command")
+
+    def mail_call(self, connection_socket):
+        email = []
+        while True:
+            client_email = connection_socket.recv(1024)
+
+            if client_email == ".":
+
+                connection_socket.send("250 Message received and to be delivered")
+                print '\n'.join(email)
+                return
+
+            else:
+                email.append(client_email)
+                connection_socket.send("continue")
 
 if __name__ == '__main__':
     server1 = MailServer()
