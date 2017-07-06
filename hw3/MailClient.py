@@ -64,7 +64,9 @@ class MailClient:
 
     def client_hello(self, f):
         while True:
-            client_hello = raw_input("Input command and domain name: ")
+
+            client_hello = "Helo "
+            client_hello += raw_input("Input command and domain name: ")
 
             self.socket.send(client_hello)
 
@@ -89,7 +91,8 @@ class MailClient:
 
     def client_from(self, f):
         while True:
-            client_from = raw_input("Input the sender's address: ")
+            client_from = "MAIL FROM: "
+            client_from += raw_input("Input the sender's address: ")
 
             self.socket.send(client_from)
 
@@ -114,7 +117,8 @@ class MailClient:
 
     def client_to(self, f):
         while True:
-            client_to = raw_input("Input the receiver's address: ")
+            client_to = "RCPT TO: "
+            client_to += raw_input("Input the receiver's address: ")
 
             self.socket.send(client_to)
 
