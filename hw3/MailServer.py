@@ -1,5 +1,5 @@
 import socket
-import threading
+import thread
 
 
 class MailServer:
@@ -27,7 +27,7 @@ class MailServer:
 
             connection_socket.send(sender)
 
-            threading.Thread(self.email_server(connection_socket, address)).start()
+            thread.start_new_thread(self.email_server, (connection_socket, address))
 
     def email_server(self, connection_socket, address):
         while True:
@@ -121,7 +121,9 @@ class MailServer:
         while True:
             client_email = connection_socket.recv(1024)
 
-            if client_email == ".":
+            split = client_email.split()
+
+            if split[0] == ".":
 
                 connection_socket.send("250 Message received and to be delivered")
 
