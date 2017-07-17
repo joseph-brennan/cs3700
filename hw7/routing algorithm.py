@@ -60,68 +60,75 @@ def dijkstra(graph, initial):
     return visited, path
 
 
-def set_up():
-    while 1:
-        routers = int(raw_input("Input the total number of routers: "))
+class Routing:
+    def __init__(self):
+        self.routers = 0
+        self.rout = []
 
-        if routers <= 2:
-            flag = file_read(routers)
-            if flag == 1:
-                return
-            else:
+    def set_up(self):
+        while 1:
+            self.routers = int(raw_input("Input the total number of routers in the network: "))
+
+            if self.routers < 2:
+                print "Error must be an integer greater than or equal to 2"
+
                 continue
 
-        else:
-            print "Error must be an integer greater than or equal to 2"
-
-            continue
-
-
-def file_read(routers):
-    table = open("topo.txt", 'r')
-
-    rout = []
-
-    for line in table:
-        rout.append(map(int, line.split()))
-
-    table.close()
-
-    while 1:
-        for name in rout:
-
-            if name[0] < 0:
-                print "Error: invalid router, cannot be negative: V%d" % name[0]
-
-                return -1
-
-            elif name[1] < 0:
-                print "Error: invalid router, cannot be negative: V%d" % name[1]
-
-                return -1
-
-            elif name[0] > routers:
-                print "Error: invalid router, larger provided value: V%d" % name[0]
-
-                return -1
-
-            elif name[1] > routers:
-                print "Error: invalid router, larger provided value: V%d" % name[1]
-
-                return -1
-
-            elif name[2] < 0:
-                print "Error: cost between routers must be a positive value %d" % name[2]
-
-                return -1
-
             else:
-                return 1
+                return
+
+    def file_read(self):
+        table = open("topo.txt", 'r')
+
+        for line in table:
+            self.rout.append(map(int, line.split()))
+
+        table.close()
+
+        while 1:
+            for name in self.rout:
+
+                if name[0] < 0:
+                    print "Error: invalid router, cannot be negative: V%d" % name[0]
+
+                    return -1
+
+                elif name[1] < 0:
+                    print "Error: invalid router, cannot be negative: V%d" % name[1]
+
+                    return -1
+
+                elif name[0] > self.routers:
+                    print "Error: invalid router, larger provided value: V%d" % name[0]
+
+                    return -1
+
+                elif name[1] > self.routers:
+                    print "Error: invalid router, larger provided value: V%d" % name[1]
+
+                    return -1
+
+                elif name[2] < 0:
+                    print "Error: cost between routers must be a positive value %d" % name[2]
+
+                    return -1
+
+                else:
+                    return
 
 
 if __name__ == '__main__':
-    set_up()
+    rout = Routing()
+    rout.set_up()
+    rout.file_read()
 
+    graph = RoutingAlgorithm()
+    for node in rout.rout:
+        graph.add_node("V%d" % node[0])
+        graph.add_node("V%d" % node[1])
+        graph.add_edge("V%d" % node[0], "V%d" % node[1], node[2])
+
+        print dijkstra(graph, "V%d" % node[0])
 
     '''
     g = RoutingAlgorithm()
