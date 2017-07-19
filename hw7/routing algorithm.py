@@ -1,146 +1,228 @@
 from collections import defaultdict
 
+nodes = -1
+Max_value = float("inf")
 
-class RoutingAlgorithm:
+
+class Graph:
     def __init__(self):
         self.nodes = set()
-
         self.edges = defaultdict(list)
-
         self.distances = {}
-
-    def add_node(self, value):
-        self.nodes.add(value)
 
     def add_edge(self, from_node, to_node, distance):
         self.edges[from_node].append(to_node)
-
         self.edges[to_node].append(from_node)
-
+        self.distances[(from_node, to_node)] = distance
         self.distances[(to_node, from_node)] = distance
 
-        self.distances[(from_node, to_node)] = distance
 
+# def dijkstra(graph, initial):
+#     visited = {initial: 1}
+#     path = {}
+#
+#     nodes = set(graph.nodes)
+#
+#     while nodes:
+#         min_node = None
+#         for node in nodes:
+#             if node in visited:
+#                 if min_node is None:
+#                     min_node = node
+#                 elif visited[node] < visited[min_node]:
+#                     min_node = node
+#
+#         if min_node is None:
+#             break
+#
+#         nodes.remove(min_node)
+#         current_weight = visited[min_node]
+#
+#         for edge in graph.edges[min_node]:
+#             weight = current_weight + graph.distances[(min_node, edge)]
+#             if edge not in visited or weight < visited[edge]:
+#                 visited[edge] = weight
+#                 path[edge] = min_node
+#
+#     return visited, path
 
-def dijkstra(graph, initial):
-    visited = {initial: 0}
+def dijkstra(graph, start):
+    N = []  # set of nodes whose least cost path definitively known
+    Y = []  # set of edges currently known to be in shortest path
+    D = [Max_value for i in range(nodes)]  # current value of cost of path from source to destination i
+    P = [-1 for i in range(nodes)]  # predecessor node along path from source to i
 
-    path = {}
+    def get_min_index():
+        index = -1
 
-    nodes = set(graph.nodes)
+        min_value = Max_value
 
-    while nodes:
-        min_node = None
+        for i in range(len(D)):
+            if i not in N and D[i] < min_value:
+                index = i
 
-        for node in nodes:
+                min_value = D[i]
 
-            if node in visited:
+        return index
 
-                if min_node is None:
-                    min_node = node
+    def print_lists():
+        print "N'", N
+        print "Y'", Y
+        print "D", D
+        print "p", P
 
-                elif visited[node] < visited[min_node]:
-                    min_node = node
+    def get_adjacent(start):
+        key_list = graph.distances.keys()
 
-        if min_node is None:
+        get_neighbors = []
+
+        for key in key_list:
+
+            if key[0] == start:
+                get_neighbors.append(key[1])
+
+        return get_neighbors
+
+    print "initial values "
+
+    N.append(start)
+
+    neighbors = get_adjacent(start)
+
+    for node in neighbors:
+        P[node] = start
+
+        D[node] = graph.distances[start, node]
+
+    # print_lists()
+
+    while 1:
+
+        k = get_min_index()
+
+        if k == -1:
             break
 
-        nodes.remove(min_node)
+        N.append(k)
 
-        current_weight = visited[min_node]
+        Y.append((P[k], k))
 
-        for edge in graph.edges[min_node]:
-            weight = current_weight + graph.distances[(min_node, edge)]
+        neighbors = get_adjacent(k)
 
-            if edge not in visited or weight < visited[edge]:
-                visited[edge] = weight
-
-                path[edge] = min_node
-
-    return visited, path
-
-
-class Routing:
-    def __init__(self):
-        self.routers = 0
-        self.rout = []
-
-    def set_up(self):
-        while 1:
-            self.routers = int(raw_input("Input the total number of routers in the network: "))
-
-            if self.routers < 2:
-                print "Error must be an integer greater than or equal to 2"
-
+        for node in neighbors:
+            if node in N:
                 continue
+            cost = D[k] + graph.distances[k, node]
 
-            else:
-                return
+            if cost < D[node]:
+                D[node] = cost
 
-    def file_read(self):
-        table = open("topo.txt", 'r')
+                P[node] = k
+        # print_lists()
+    return P, N
 
-        for line in table:
-            self.rout.append(map(int, line.split()))
+# def shortest_path(graph, origin, destination):
+#     visited, paths = dijkstra(graph, origin)
+#     full_path = deque()
+#     _destination = paths[destination]
+#
+#     while _destination != origin:
+#         full_path.appendleft(_destination)
+#         _destination = paths[_destination]
+#
+#     full_path.appendleft(origin)
+#     full_path.append(destination)
+#
+#     return visited[destination], list(full_path)
 
-        table.close()
 
-        while 1:
-            for name in self.rout:
+def check_rout(P, source, destination):
+    pre = P[destination]
 
-                if name[0] < 0:
-                    print "Error: invalid router, cannot be negative: V%d" % name[0]
-
-                    return -1
-
-                elif name[1] < 0:
-                    print "Error: invalid router, cannot be negative: V%d" % name[1]
-
-                    return -1
-
-                elif name[0] > self.routers:
-                    print "Error: invalid router, larger provided value: V%d" % name[0]
-
-                    return -1
-
-                elif name[1] > self.routers:
-                    print "Error: invalid router, larger provided value: V%d" % name[1]
-
-                    return -1
-
-                elif name[2] < 0:
-                    print "Error: cost between routers must be a positive value %d" % name[2]
-
-                    return -1
-
-                else:
-                    return
+    if pre == source:
+        return destination
+    else:
+        return check_rout(P, source, pre)
 
 
 if __name__ == '__main__':
-    rout = Routing()
-    rout.set_up()
-    rout.file_read()
+    graph = Graph()
 
-    graph = RoutingAlgorithm()
-    for node in rout.rout:
-        graph.add_node("V%d" % node[0])
-        graph.add_node("V%d" % node[1])
-        graph.add_edge("V%d" % node[0], "V%d" % node[1], node[2])
+    initial_node = 0
+    while 1:
+        nodes = 1
+        nodes += input("how many nodes are there?")
+        if nodes < 2:
+            print "Error msut be an integer great or equal to two"
+        else:
+            break
 
-        print dijkstra(graph, "V%d" % node[0])
+    routers = open("topo.txt", 'r')
 
-    '''
-    g = RoutingAlgorithm()
-    g.add_node('a')
-    g.add_node('b')
-    g.add_node('c')
-    g.add_node('d')
+    flag = False
 
-    g.add_edge('a', 'b', 10)
-    g.add_edge('b', 'c', 10)
-    g.add_edge('a', 'c', 15)
-    g.add_edge('c', 'd', 20)
+    while 1:
+        for line in routers:
 
-    print(dijkstra(g, 'a'))
-    '''
+            router = line.strip().split()
+
+            if int(router[0]) < 0:
+                print "Error: invalid router, cannot be negative: V%s" % router[0]
+                flag = True
+                break
+
+            elif int(router[1]) < 0:
+                print "Error: invalid router, cannot be negative: V%s" % router[1]
+
+                flag = True
+                break
+
+            elif int(router[0]) > nodes:
+                print "Error: invalid router, larger provided value: V%s" % router[0]
+
+                flag = True
+                break
+
+            elif int(router[1]) > nodes:
+                print "Error: invalid router, larger provided value: V%s" % router[1]
+
+                flag = True
+                break
+
+            elif int(router[2]) < 0:
+                print "Error: cost between routers must be a positive value %s" % router[2]
+
+                flag = True
+                break
+
+            else:
+                graph.add_edge(int(router[0]), int(router[1]), int(router[2]))
+
+        routers.close()
+
+        if flag:
+            new_file = input("enter correct cost file")
+
+            routers = open(new_file, 'r')
+        else:
+            break
+
+    P, N = dijkstra(graph, initial_node)
+
+    source = initial_node
+
+    f = open("testResultsClient.txt", 'w')
+
+    for destination in N:
+        if destination == source:
+            pass
+        else:
+            print "{:15}Link".format("Destination")
+            f.write("{:15}Link".format("Destination") + '\n')
+
+            print "V{:<12} (V0, V{})".format(destination, check_rout(P, source, destination))
+            f.write("V{:<12} (V0, V{})".format(destination, check_rout(P, source, destination)) + '\n')
+
+    f.close()
+
+
